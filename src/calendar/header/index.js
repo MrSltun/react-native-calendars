@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { ActivityIndicator } from 'react-native';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
-import XDate from 'xdate';
+// import XDate from 'xdate';
+import Moment from 'moment';
 import PropTypes from 'prop-types';
 import styleConstructor from './style';
 import { weekDayNames } from '../../dateutils';
@@ -10,7 +11,7 @@ class CalendarHeader extends Component {
   static propTypes = {
     theme: PropTypes.object,
     hideArrows: PropTypes.bool,
-    month: PropTypes.instanceOf(XDate),
+    month: PropTypes.instanceOf(Moment),
     addMonth: PropTypes.func,
     showIndicator: PropTypes.bool,
     firstDay: PropTypes.number,
@@ -40,8 +41,8 @@ class CalendarHeader extends Component {
 
   shouldComponentUpdate(nextProps) {
     if (
-      nextProps.month.toString('yyyy MM') !==
-      this.props.month.toString('yyyy MM')
+      nextProps.month.format('YYYY MM') !==
+      this.props.month.format('YYYY MM')
     ) {
       return true;
     }
@@ -80,13 +81,13 @@ class CalendarHeader extends Component {
           onPress={this.onPressLeft}
           style={this.style.arrow}
           hitSlop={{left: 20, right: 20, top: 20, bottom: 20}}
-        >
+          >
           {this.props.renderArrow
-            ? this.props.renderArrow('left')
-            : <Image
-                source={require('../img/previous.png')}
-                style={this.style.arrowImage}
-              />}
+          ? this.props.renderArrow('left')
+          : <Image
+              source={require('../img/previous.png')}
+              style={this.style.arrowImage}
+            />}
         </TouchableOpacity>
       );
       rightArrow = (
@@ -114,7 +115,7 @@ class CalendarHeader extends Component {
           {leftArrow}
           <View style={{ flexDirection: 'row' }}>
             <Text allowFontScaling={false} style={this.style.monthText} accessibilityTraits='header'>
-              {this.props.month.toString(this.props.monthFormat ? this.props.monthFormat : 'MMMM yyyy')}
+              {this.props.month.format(this.props.monthFormat ? this.props.monthFormat : 'MMMM YYYY')}
             </Text>
             {indicator}
           </View>

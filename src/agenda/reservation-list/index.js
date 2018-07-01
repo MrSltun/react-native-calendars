@@ -6,7 +6,8 @@ import {
 } from 'react-native';
 import Reservation from './reservation';
 import PropTypes from 'prop-types';
-import XDate from 'xdate';
+// import XDate from 'xdate';
+import Moment from 'moment';
 
 import dateutils from '../../dateutils';
 import styleConstructor from './style';
@@ -30,8 +31,8 @@ class ReactComp extends Component {
     // considered that the date in question is not yet loaded
     reservations: PropTypes.object,
 
-    selectedDay: PropTypes.instanceOf(XDate),
-    topDay: PropTypes.instanceOf(XDate),
+    selectedDay: PropTypes.instanceOf(Moment),
+    topDay: PropTypes.instanceOf(Moment)
   };
 
   constructor(props) {
@@ -123,7 +124,7 @@ class ReactComp extends Component {
 
   getReservationsForDay(iterator, props) {
     const day = iterator.clone();
-    const res = props.reservations[day.toString('yyyy-MM-dd')];
+    const res = props.reservations[day.format('YYYY-MM-DD')];
     if (res && res.length) {
       return res.map((reservation, i) => {
         return {
@@ -153,7 +154,7 @@ class ReactComp extends Component {
     let reservations = [];
     if (this.state.reservations && this.state.reservations.length) {
       const iterator = this.state.reservations[0].day.clone();
-      while (iterator.getTime() < props.selectedDay.getTime()) {
+      while (iterator.valueOf() < props.selectedDay.valueOf()) {
         const res = this.getReservationsForDay(iterator, props);
         if (!res) {
           reservations = [];
@@ -161,7 +162,7 @@ class ReactComp extends Component {
         } else {
           reservations = reservations.concat(res);
         }
-        iterator.addDays(1);
+        iterator.add(1, 'days');
       }
     }
     const scrollPosition = reservations.length;
@@ -171,14 +172,14 @@ class ReactComp extends Component {
       if (res) {
         reservations = reservations.concat(res);
       }
-      iterator.addDays(1);
+      iterator.add(1, 'days');
     }
 
     return {reservations, scrollPosition};
   }
 
   render() {
-    if (!this.props.reservations || !this.props.reservations[this.props.selectedDay.toString('yyyy-MM-dd')]) {
+    if (!this.props.reservations || !this.props.reservations[this.props.selectedDay.format('YYYY-MM-DD')]) {
       if (this.props.renderEmptyData) {
         return this.props.renderEmptyData();
       }

@@ -1,47 +1,51 @@
-const XDate = require('xdate');
+// const XDate = require('xdate');
+const Moment = require('moment');
 
 function sameMonth(a, b) {
-  return a instanceof XDate && b instanceof XDate &&
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth();
+  return Moment.isMoment(a) && Moment.isMoment(b) &&
+    a.get('year') === b.get('year') &&
+    a.get('month') === b.get('month');
 }
 
 function sameDate(a, b) {
-  return a instanceof XDate && b instanceof XDate &&
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate();
+  return Moment.isMoment(a) && Moment.isMoment(b) &&
+    a.get('year') === b.get('year') &&
+    a.get('month') === b.get('month') &&
+    a.get('date') === b.get('date');
 }
 
 function isGTE(a, b) {
-  return b.diffDays(a) > -1;
+  return a.diff(b, 'days') > -1;
 }
 
 function isLTE(a, b) {
-  return a.diffDays(b) > -1;
+  return b.diff(a, 'days') > -1;
 }
 
 function fromTo(a, b) {
   const days = [];
   let from = +a, to = +b;
-  for (; from <= to; from = new XDate(from, true).addDays(1).getTime()) {
-    days.push(new XDate(from, true));
+  for (; from <= to; from = Moment.utc(from).add(1, 'days').valueOf()) {
+    days.push(Moment.utc(from));
   }
   return days;
 }
 
 function month(xd) {
-  const year = xd.getFullYear(), month = xd.getMonth();
+  const year = xd.get('year'), month = xd.get('month');
   const days = new Date(year, month + 1, 0).getDate();
 
-  const firstDay = new XDate(year, month, 1, 0, 0, 0, true);
-  const lastDay = new XDate(year, month, days, 0, 0, 0, true);
+  // const firstDay = new XDate(year, month, 1, 0, 0, 0, true);
+  const firstDay = Moment.utc({year: year, month: month, day: 1, hour: 0, minute: 0, second: 0});
+  // const lastDay = new XDate(year, month, days, 0, 0, 0, true);
+  const lastDay = Moment.utc({year: year , month: month, day: days, hour: 0, minute: 0, second: 0});
 
   return fromTo(firstDay, lastDay);
 }
 
 function weekDayNames(firstDayOfWeek = 0) {
-  let weekDaysNames = XDate.locales[XDate.defaultLocale].dayNamesShort;
+  // let weekDaysNames = XDate.locales[XDate.defaultLocale].dayNamesShort;
+  let weekDaysNames = Moment.weekdaysShort();
   const dayShift = firstDayOfWeek % 7;
   if (dayShift) {
     weekDaysNames = weekDaysNames.slice(dayShift).concat(weekDaysNames.slice(0, dayShift));
@@ -59,14 +63,14 @@ function page(xd, firstDayOfWeek) {
   firstDayOfWeek = firstDayOfWeek || 0;
 
   const from = days[0].clone();
-  if (from.getDay() !== fdow) {
-    from.addDays(-(from.getDay() + 7 - fdow) % 7);
+  if (from.get('day') !== fdow) {
+    from.add(-(from.get('day') + 7 - fdow) % 7, 'days');
   }
 
   const to = days[days.length - 1].clone();
-  const day = to.getDay();
+  const day = to.get('day');
   if (day !== ldow) {
-    to.addDays((ldow + 7 - day) % 7);
+    to.add((ldow + 7 - day) % 7, 'days');
   }
 
   if (isLTE(from, days[0])) {
